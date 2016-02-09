@@ -32,10 +32,15 @@ class Command(BaseCommand):
     def handle(self, **options):
 
         verbose = int(options.get('verbosity'))
+
         training_prefix = getattr(settings, 'TRAINING_ACCOUNT_PREFIX', 'train')
 
-        query = Person.active.all()
-        query = query.filter(username__startswith=training_prefix)
+	# Training accounts are system users, and so excluded from Person.active.all()!
+	# Thus we must just reference them as Person.objects.all()
+        #query = Person.active.all()
+        query = Person.objects.all()
+        #query = query.filter(username__startswith=training_prefix)
+        query = query.filter(username__iregex=training_prefix)
         query = query.order_by('username')
 
         for person in query.all():
